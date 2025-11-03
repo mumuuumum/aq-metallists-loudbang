@@ -582,7 +582,7 @@ public class LBService extends Service implements Runnable,
                 this.setStatus(getString(R.string.sv_status_recording));
 
                 boolean bDoReportVolume = this.sp.getBoolean("report_volume", false);
-
+                
                 ar.startRecording();
                 final Date recordTimestamp = new Date(System.currentTimeMillis());
                 while (run && !this.quitter) {

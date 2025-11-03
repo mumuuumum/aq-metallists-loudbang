@@ -1,16 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 33
-//    buildTools 30
-    ndkVersion "22.0.7026061"
+    compileSdkVersion 36
+    ndkVersion "22.1.7171670"
 
     defaultConfig {
         applicationId "aq.metallists.loudbang"
-        minSdkVersion 14
-        targetSdkVersion 33
+        minSdkVersion 16
+        targetSdkVersion 36
         versionCode 50
         versionName "0.50"
+        multiDexEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
 
 // Third-party
-    def acraVersion = "5.7.0"
+    def acraVersion = "5.13.1"
     implementation "ch.acra:acra-dialog:$acraVersion"
     implementation "ch.acra:acra-mail:$acraVersion"
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))

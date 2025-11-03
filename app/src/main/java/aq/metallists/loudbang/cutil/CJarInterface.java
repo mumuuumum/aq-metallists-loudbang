@@ -6,6 +6,10 @@ public class CJarInterface {
         System.loadLibrary("QuietScream");
     }
 
+    public static short DEFAULT_VOLUME = 16383;
+
+    public static native byte[] GenTestBeep(short volume, int offset);
+
     public static native byte[] WSPREncodeToPCM(String callsign, String locator, int power, int offset, boolean lsb);
 
     public static native WSPRMessage[] WSPRDecodeFromPcm(byte[] sound, double dialfreq, boolean lsb);

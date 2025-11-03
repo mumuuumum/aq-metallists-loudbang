@@ -771,7 +771,7 @@ ReadWavFileEx(unsigned char *soundarr, int sarlen, int ntrmin, float *idat, floa
 
 
     buf2 = malloc((npoints + 2) * sizeof(short)); // fatality?
-    printf("MEMCPY: %d -> %d", sarlen, npoints + 2 * sizeof(short));
+    printf("MEMCPY: %d -> %lu", sarlen, (unsigned long)(npoints + 2 * sizeof(short)));
     memcpy(buf2, soundarr, (size_t) sarlen);
 
 

@@ -276,5 +276,8 @@
         "Please contact me with some information about your device model and manufacturer."
     </string>
     <string name="audiorecord_permission_failed">Error acquiring microphone permission. Triplecheck your settings.</string>
-
+    <string name="str_btn_soundcheck_label" translatable="false">SOUND CHECK</string>
+    <string name="str_btn_soundcheck_nan" translatable="false">NaN !</string>
+    <string name="str_btn_soundcheck_toobig" translatable="false">(&gt;32767 !)</string>
+    <string name="str_btn_soundcheck_toolow" translatable="false">(&lt;-32767 !)</string>
 </resources>

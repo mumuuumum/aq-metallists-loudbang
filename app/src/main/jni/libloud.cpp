@@ -183,3 +183,32 @@ Java_aq_metallists_loudbang_cutil_CJarInterface_WSPRLatLonToGSQ(JNIEnv *env, jcl
     return env->NewStringUTF(result);
 }
 
+#define TEST_SOUND_LEN 12000 // 1 second
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_aq_metallists_loudbang_cutil_CJarInterface_GenTestBeep
+        (JNIEnv *env, jclass clazz, jshort volume, jint j_offset) {
+    double TAU = 2 * M_PI;
+
+    short *sound = (short *) malloc(sizeof(short) * TEST_SOUND_LEN);
+    memset(sound, 0, sizeof(short) * TEST_SOUND_LEN);
+
+
+    for (int i = 0; i < TEST_SOUND_LEN; i++) {
+        double frequency = 1500 + ((int) j_offset) + 2 * 1.4548;
+        double theta = frequency * TAU / (double) 12000;
+        // 'volume' is UInt16 with range 0 thru Uint16.MaxValue ( = 65 535)
+        // we need 'amp' to have the range of 0 thru Int16.MaxValue ( = 32 767)
+        double amp = volume >> 2; // so we simply set amp = volume / 2
+
+        sound[i] = (short) (amp * sin(theta * (double) i));
+    }
+
+
+    jbyteArray ret = env->NewByteArray(TEST_SOUND_LEN * sizeof(short));
+    env->SetByteArrayRegion(ret, 0, TEST_SOUND_LEN * sizeof(short),
+                            (jbyte *) sound);
+    free(sound);// is it work?
+    return ret;
+}

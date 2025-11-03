@@ -5,34 +5,36 @@ import android.content.Context;
 
 import org.acra.ACRA;
 import org.acra.BuildConfig;
-import org.acra.annotation.AcraCore;
 import org.acra.config.CoreConfigurationBuilder;
 import org.acra.config.DialogConfigurationBuilder;
 import org.acra.config.MailSenderConfigurationBuilder;
 import org.acra.data.StringFormat;
 
-@AcraCore(buildConfigClass = BuildConfig.class)
 public class LoudBangApplication extends Application {
-
-    public static CoreConfigurationBuilder getAcraBuilder(Context ctx) {
-        CoreConfigurationBuilder builder = new CoreConfigurationBuilder(ctx);
-        builder.setBuildConfigClass(BuildConfig.class).setReportFormat(StringFormat.JSON);
-        builder.getPluginConfigurationBuilder(DialogConfigurationBuilder.class)
-                .setResText(R.string.acra_sendmail_required)
-                .setEnabled(true);
-        builder.getPluginConfigurationBuilder(MailSenderConfigurationBuilder.class)
-                .setMailTo("themetallists@freemail.hu")
-                .setSubject("ACRA ERROR REPORT")
-                .setReportAsFile(false)
-                .setEnabled(true);
-
-        return builder;
-    }
 
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        ACRA.init(this, LoudBangApplication.getAcraBuilder(this));
+        CoreConfigurationBuilder builder = new CoreConfigurationBuilder();
+        builder.setBuildConfigClass(BuildConfig.class);
+        builder.setReportFormat(StringFormat.JSON);
+        builder.withPluginConfigurations(
+                new DialogConfigurationBuilder()
+                        .withText(base.getString(R.string.acra_sendmail_required))
+                        .withEnabled(true)
+                .build()
+        );
+        builder.withPluginConfigurations(
+                new MailSenderConfigurationBuilder()
+                        .withMailTo("themetallists@freemail.hu")
+                        .withSubject("ACRA ERROR REPORT")
+                        .withReportAsFile(false)
+                        .withEnabled(true)
+                        .build()
+        );
+
+
+        ACRA.init(this, builder);
     }
 }
