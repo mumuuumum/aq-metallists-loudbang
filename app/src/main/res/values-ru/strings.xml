@@ -37,6 +37,7 @@
     <string name="sets_tx_dutycycle">Вероятность выхода на передачу.</string>
     <string name="sets_tx_dutycycle_sum">Шанс в % того, что следующий 2х минутный цикл будет циклом передачи.</string>
     <string name="sets_tx_pttctl">Управление передачей (PTT)</string>
+    <string name="sets_rx_mediacapture_sum">Записывает звук с аудиовыхода вашего устройства. Подходит для SDRов, требует Android 10+</string>
     <string name="sets_tx_sndout">Вывод аудио</string>
     <string name="sets_urdata_group">Ваша станция</string>
     <string name="sets_use_6letter">Передавать 6 значный QTH-локатор</string>
@@ -110,7 +111,7 @@
         Вкладка журнала содержит сообщения, чей позывной известен, их QTH локатор может быть обновлён при помощи сообщений 3-го типа, которые в журнале не отображаются.
     ]]></string>
 
-    <string name="welcomdlg_text">Wanna WSPR? You\'ve got it!\nДобро пожаловать в первый WSPR-клиент с декодером!</string>
+    <string name="welcomdlg_text">Wanna WSPR? You\'ve got it!\nДобро пожаловать в первый WSPR-клиент с декодером!\n=== ВНИМАНИЕ ===\nGoogle добавит новую систему верификации цифровых\nподписей для приложений в сентябре 2026.\nЭто приложение (и множество других) не будет\nпроходить требующее телефон, г-нокапчевое\nвзаимодействие с ИИ Google, приправленное\nотсутствующей техподдержкой.\n\nЕсли вы хотите продолжить пользоваться открытым ПО в будущем:\n- Покупайте рутабельные телефоны с разлочиваемым бутом \n- Удаляйте Google\'овские Adware and Spyware со своих устройств\n- Используйте открытые прошивки, например LineageOS</string>
     <string name="sets_error_6letters">Невозможно использовать 4-буквенный QTH локатор с префиксом/суффиксом в позывном.</string>
     <string name="lbl_time">Time:</string>
     <string name="mnu_switch_next_mode" translatable="false">Смена ПРД/ПРМ на след. цикле</string>
@@ -221,4 +222,20 @@
     <string name="lbl_tx_next_cnt">Передавать в сл. циклах:</string>
     <string name="lbl_tx_swlmode">РЕЖИМ SWL</string>
     <string name="audiorecord_permission_failed">Ошибка получения пермишна на микрофон. Проверьте настройки.</string>
+    <string name="sets_tx_soundampl_sum">Short (2-байтовое) число. Используйте значение от 0 до 32767 чтобы дополнительно увеличить громкость помимо настроек громкости Android\'а</string>
+    <string name="sets_rx_inputdevice">ID устройства для записи звука</string>
+    <string name="sets_rx_inputdevice_sum">Внизу страницы \"О Программе\" можно найти список звуковых входов. Установите в -1 для использования устройства по-умолчанию без предупреждений.</string>
+    <string name="sets_rx_mediacapture">Режим МедиаЗахвата</string>
+    <string name="sets_tx_soundampl">Усиление звука</string>
+    <string name="sndinput_success_acquiring">Ваше устройство имеет следующие аудиовходы:</string>
+    <string name="sndinput_device_vanished">Выбранного вами устройства записи больше нет в системе. Использую дефолтное.</string>
+    <string name="sndinput_device_invalid">Выбранное вами устройство записи неверно. Откат к настройкам по-умолчанию</string>
+    <string name="sndinput_low_android_version2">Версия Android на вашем устройстве слишком низкая для выбора источника звука.</string>
+    <string name="sndinput_error_acquiring">Ошибка получения информации об устройствах записи:</string>
+    <string name="sndinput_low_android_version">Версия Android на вашем устройстве слишком низкая для этой функции.</string>
+    <string name="sndinput_mediacapture_low_android_version">Версия Android на вашем устройстве слишком низкая для МедиаЗахвата. Отключите эту функцию в настройках программы.</string>
+    <string name="sndinput_mediacapture_denied">Вы отклонили запрос МедиаЗахвата. Отключите опцию в настройках, если хотите писать звук с микрофона.</string>
+    <string name="sndinput_mediacapture_failed">Ошибка получения разрешения на МедиаЗахват. Он может не поддерживаться вашим устройством.</string>
+    <string name="str_btn_soundcheck_label">ТЕСТ ЗВУКА</string>
+    <string name="welcomdlg_button">Скрыть и запомнить</string>
 </resources>

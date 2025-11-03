@@ -8,8 +8,8 @@ android {
         applicationId "aq.metallists.loudbang"
         minSdkVersion 16
         targetSdkVersion 36
-        versionCode 50
-        versionName "0.50"
+        versionCode 51
+        versionName "0.51"
         multiDexEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
@@ -17,6 +17,7 @@ android {
         externalNativeBuild {
             cmake {
                 targets "QuietScream"
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
     }
@@ -44,6 +45,7 @@ android {
 dependencies {
 // AndroidX
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
@@ -55,5 +57,10 @@ dependencies {
     def acraVersion = "5.13.1"
     implementation "ch.acra:acra-dialog:$acraVersion"
     implementation "ch.acra:acra-mail:$acraVersion"
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))
+}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }

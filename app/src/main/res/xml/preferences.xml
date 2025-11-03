@@ -45,6 +45,19 @@
             android:summary="Looks cool, may freeze."
             android:title="Show volume"
             app:iconSpaceReserved="false" />
+        <aq.metallists.loudbang.ui.main.IntegerEditTextPreference
+            android:defaultValue="-1"
+            android:inputType="number"
+            android:key="rx_deviceid"
+            android:summary="@string/sets_rx_inputdevice_sum"
+            android:title="@string/sets_rx_inputdevice"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="mediacapture_mode"
+            android:summary="@string/sets_rx_mediacapture_sum"
+            android:title="@string/sets_rx_mediacapture"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -86,6 +99,15 @@
             android:key="tx_probability"
             android:summary="@string/sets_tx_dutycycle_sum"
             android:title="@string/sets_tx_dutycycle"
+            app:iconSpaceReserved="false" />
+        <aq.metallists.loudbang.ui.main.IntegerEditTextPreference
+            android:defaultValue="16383"
+            android:dependency="use_tx"
+            android:digits="-0123456789"
+            android:inputType="number"
+            android:key="tx_soundampl"
+            android:summary="@string/sets_tx_soundampl_sum"
+            android:title="@string/sets_tx_soundampl"
             app:iconSpaceReserved="false" />
         <ListPreference
             android:defaultValue="music"

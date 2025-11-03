@@ -10,7 +10,7 @@ public class CJarInterface {
 
     public static native byte[] GenTestBeep(short volume, int offset);
 
-    public static native byte[] WSPREncodeToPCM(String callsign, String locator, int power, int offset, boolean lsb);
+    public static native byte[] WSPREncodeToPCM(String callsign, String locator,short volume, int power, int offset, boolean lsb);
 
     public static native WSPRMessage[] WSPRDecodeFromPcm(byte[] sound, double dialfreq, boolean lsb);
 

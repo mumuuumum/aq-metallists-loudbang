@@ -104,6 +104,12 @@
     <string name="sets_use_transmit_sum">Requires a government-issued licence and band allocation. Check laws of your country.</string>
     <string name="sets_tx_dutycycle">Duty cycle</string>
     <string name="sets_tx_dutycycle_sum">Chance in %s of next two-minute cycle is being the transmition instead of reception.</string>
+    <string name="sets_tx_soundampl">Sound amplification</string>
+    <string name="sets_tx_soundampl_sum">A short (2-byte) volume number. Use a value from 0 to 32767 to additionally increase volume beyond your device\'s settings.</string>
+    <string name="sets_rx_inputdevice">Sound input DeviceID</string>
+    <string name="sets_rx_inputdevice_sum">At the bottom of the About page you\'ll find the list of devices. Set -1 to use default one without "not found" notification.</string>
+    <string name="sets_rx_mediacapture">MediaCapture mode</string>
+    <string name="sets_rx_mediacapture_sum">Records your device\'s audio output instead of input. Useful for SDRs, requires Android 10+</string>
     <string name="sets_tx_sndout">Audio output</string>
     <string name="sets_tx_pttctl">PTT control</string>
 
@@ -180,8 +186,7 @@
     <string name="filter_date_1year">Last year</string>
 
     <string name="welcomdlg_title" translatable="false">Loud Bang!!!</string>
-    <string name="welcomdlg_text" tools:ignore="Typos">Wanna WSPR? You\'ve got it!\nWelcome to the first decoding-capable WSPR client for android!</string>
-    <string name="welcomdlg_button" translatable="false">OK</string>
+    <string name="welcomdlg_text" tools:ignore="Typos">Wanna WSPR? You\'ve got it! Welcome to the first decoding-capable WSPR client for android! === WARNING === Google is adding a new signature verification scheme  for android apps after September 2026. This app (and many others) will not undergo any  Google\'s AI-based interactions with phone-requiring  captcha-ensh***ified registration processes with  nonexistent human support capability.  If you want to use any open-source apps in the future: - Buy rootable phones with unlockable bootloaders - Remove Google\'s Adware and Spyware from your devices - Use open firmwares, like  LineageOS</string>
 
     <string name="detailmsg_title">Message Details</string>
     <string name="detailmsg_text"><![CDATA[
@@ -276,8 +281,18 @@
         "Please contact me with some information about your device model and manufacturer."
     </string>
     <string name="audiorecord_permission_failed">Error acquiring microphone permission. Triplecheck your settings.</string>
-    <string name="str_btn_soundcheck_label" translatable="false">SOUND CHECK</string>
+    <string name="str_btn_soundcheck_label">SOUND CHECK</string>
     <string name="str_btn_soundcheck_nan" translatable="false">NaN !</string>
     <string name="str_btn_soundcheck_toobig" translatable="false">(&gt;32767 !)</string>
     <string name="str_btn_soundcheck_toolow" translatable="false">(&lt;-32767 !)</string>
+    <string name="sndinput_low_android_version">Your Android version is too low for this function.</string>
+    <string name="sndinput_low_android_version2">Your Android version is too low for sound input selection.</string>
+    <string name="sndinput_error_acquiring">Error acquiring audio input information:</string>
+    <string name="sndinput_success_acquiring">Your device has the following audio inputs:</string>
+    <string name="sndinput_device_vanished">The sound input device you requested is no longer present. Using the default one.</string>
+    <string name="sndinput_device_invalid">The sound input device you entered is invalid. Reverting to default.</string>
+    <string name="sndinput_mediacapture_low_android_version">Your android version is too low for mediacapture. Disable this option in settings and try again.</string>
+    <string name="sndinput_mediacapture_denied">You have denied the MediaCapture request. Disable the option in setting if you want to record audio from microphone.</string>
+    <string name="sndinput_mediacapture_failed">Failed to obtain MediaCapture permission. Might be unsupported by your device.</string>
+    <string name="welcomdlg_button">HIDE&amp;REMEMBER</string>
 </resources>

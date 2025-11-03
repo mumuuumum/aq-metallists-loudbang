@@ -4,6 +4,7 @@
 
 #ifndef LOUD_BANG_JNI_LINK_H
 #define LOUD_BANG_JNI_LINK_H
+
 #include <jni.h>
 
 #define WSPR_SYMBOL_LENGTH 8192
@@ -21,7 +22,7 @@ extern "C" {
  * Signature: (Ljava/lang/String;Ljava/lang/String;I)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_aq_metallists_loudbang_cutil_CJarInterface_WSPREncodeToPCM
-        (JNIEnv *, jclass, jstring, jstring, jint, jint,jboolean);
+        (JNIEnv *, jclass, jstring, jstring, jshort, jint, jint, jboolean);
 
 extern "C"
 JNIEXPORT jint JNICALL

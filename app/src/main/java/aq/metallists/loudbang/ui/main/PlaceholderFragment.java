@@ -10,6 +10,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
@@ -18,8 +21,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -96,6 +102,33 @@ public class PlaceholderFragment extends Fragment
         super.onDestroyView();
     }
 
+    private final ActivityResultLauncher<Intent> mediaProjectionLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                        Toast.makeText(
+                                this.getContext(),
+                                R.string.sndinput_mediacapture_low_android_version,
+                                Toast.LENGTH_LONG
+                        ).show();
+                        return;
+                    }
+                    MediaProjectionManager mpm = (MediaProjectionManager) this.getContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                    Intent data = result.getData();
+                    if (mpm == null || data == null) {
+                        Toast.makeText(getContext(), R.string.sndinput_mediacapture_failed, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    data.setClass(getContext(), LBService.class);
+                    data.putExtra("mprCode", result.getResultCode());
+                    PlaceholderFragment.this.getActivity().startService(data);
+                } else {
+                    Toast.makeText(getContext(), R.string.sndinput_mediacapture_denied, Toast.LENGTH_LONG).show();
+                    return;
+                }
+            });
+
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(
@@ -108,7 +141,7 @@ public class PlaceholderFragment extends Fragment
         final ToggleButton ltb = root.findViewById(R.id.launch_toggle_btn);
         final TextView lblTxNExt = root.findViewById(R.id.lblTransmitNextCount);
 
-        if (LBService.lastKnownState.length() > 0) {
+        if (!LBService.lastKnownState.isEmpty()) {
             state.setText(LBService.lastKnownState);
         }
 
@@ -155,7 +188,7 @@ public class PlaceholderFragment extends Fragment
             }
 
 
-            if (permissionsToRequest.size() > 0) {
+            if (!permissionsToRequest.isEmpty()) {
                 ActivityCompat.requestPermissions(PlaceholderFragment.this.getActivity(),
                         permissionsToRequest.toArray(new String[]{}),
                         0);
@@ -170,6 +203,24 @@ public class PlaceholderFragment extends Fragment
                 if (txNextCtr > 0) {
                     this.sp.edit().putInt("tx_next_counter", 0).apply();
                 }
+
+                if (sp.getBoolean("mediacapture_mode", false)) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                        Toast.makeText(
+                                this.getContext(),
+                                R.string.sndinput_mediacapture_low_android_version,
+                                Toast.LENGTH_LONG
+                        ).show();
+                        ltb.setChecked(false);
+                        return;
+                    }
+                    MediaProjectionManager mpm = (MediaProjectionManager) this.getContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                    Intent captureIntent = mpm.createScreenCaptureIntent();
+                    mediaProjectionLauncher.launch(captureIntent);
+                    ltb.setChecked(true);
+                    return;
+                }
+
                 PlaceholderFragment.this.getActivity().startService(
                         new Intent(PlaceholderFragment.this.getActivity(), LBService.class));
                 ltb.setChecked(true);
@@ -233,7 +284,7 @@ public class PlaceholderFragment extends Fragment
         //set tracking timer forsome systems
         final TextView lblCurrentTime = root.findViewById(R.id.lblCurrentTime);
         final Timer tmr = new Timer();
-        tmr.scheduleAtFixedRate(new TimerTask() {
+        tmr.schedule(new TimerTask() {
             @Override
             public void run() {
                 Time today = new Time(Time.getCurrentTimezone());

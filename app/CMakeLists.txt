@@ -4,6 +4,7 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+add_link_options(-Wl,-z,max-page-size=16384)
 
 # Specifies a library name, specifies whether the library is STATIC or
 # SHARED, and provides relative paths to the source code. You can

@@ -1,5 +1,7 @@
 package aq.metallists.loudbang;
 
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -11,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteStatement;
 import android.hardware.camera2.CameraManager;
@@ -22,6 +25,8 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +40,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
@@ -54,15 +60,13 @@ import aq.metallists.loudbang.cutil.CJarInterface;
 import aq.metallists.loudbang.cutil.DBHelper;
 import aq.metallists.loudbang.cutil.WSPRMessage;
 import aq.metallists.loudbang.cutil.WSPRNetSender;
+import aq.metallists.loudbang.sndutil.AudioPlaybackTools;
+import aq.metallists.loudbang.sndutil.AudioRecordTools;
+import aq.metallists.loudbang.sndutil.CommonAudioTools;
 
 public class LBService extends Service implements Runnable,
         SharedPreferences.OnSharedPreferenceChangeListener, LocationListener {
     public static final String NSC_ID = "NotAServiceChannel";
-    private static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
-    private static final int SAMPLE_RATE = 12000; // Hz
-    private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-    private static final int CHANNEL_MASK = AudioFormat.CHANNEL_IN_MONO;
-    private static final int BUFFER_SIZE = 2 * AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_MASK, ENCODING);
     public static String lastKnownState = "";
     private final double dialfreq = 14.0;
     Thread t;
@@ -74,6 +78,7 @@ public class LBService extends Service implements Runnable,
     private LocationManager glm;
     private AudioTrack audio = null;
     private AudioRecord ar = null;
+    private Object mpr = null;
     private int sessionID = 0;
 
     @Nullable
@@ -107,8 +112,6 @@ public class LBService extends Service implements Runnable,
                 .setSilent(true)
                 .build();
 
-        startForeground(1, nt);
-        this.setStatusWithNotification = true;
 
         this.sp.registerOnSharedPreferenceChangeListener(this);
 
@@ -138,10 +141,43 @@ public class LBService extends Service implements Runnable,
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wake = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LoudBang::BangBang");
 
+        this.startMyselfSomehow(nt, intent.hasExtra("mprCode"));
+
+        if (intent.hasExtra("mprCode") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            mpr = (Object) mpm.getMediaProjection(intent.getIntExtra("mprCode", -1), intent);
+        }
+
+
+        this.setStatusWithNotification = true;
+
         t = new Thread(this);
         this.quitter = false;
         t.start();
         return START_NOT_STICKY;
+    }
+
+    private void startMyselfSomehow(android.app.Notification nt, boolean isMP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            int initialType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
+            initialType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+
+            if (sp.getBoolean("use_gps", false) || sp.getBoolean("use_celltowers", false)) {
+                initialType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+            }
+            if (isMP) {
+                initialType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+            }
+
+            ServiceCompat.startForeground(
+                    this,
+                    1,
+                    nt,
+                    initialType
+            );
+        } else {
+            startForeground(1, nt);
+        }
     }
 
     private void createNotificationChannel() {
@@ -322,6 +358,7 @@ public class LBService extends Service implements Runnable,
                 if (doTx && globalTxEnable) {
                     // update txsound
                     boolean lsb_mode = this.sp.getBoolean("lsb_mode", false);
+                    short volume = AudioPlaybackTools.getVolume(this.sp);
 
                     String callsign = this.sp.getString("callsign", "R0TST");
                     if (callsign.length() <= 6 && !callsign.contains("/")) {
@@ -333,10 +370,10 @@ public class LBService extends Service implements Runnable,
                             int power = Integer.parseInt(this.sp.getString("outpower", "0"));
 
                             txsound = CJarInterface.WSPREncodeToPCM(
-                                    callsign, locator.substring(0, 4), power, 0, lsb_mode);
+                                    callsign, locator.substring(0, 4), volume, power, 0, lsb_mode);
 
                             txsound2 = CJarInterface.WSPREncodeToPCM(
-                                    callsign, locator, power, 0, lsb_mode);
+                                    callsign, locator, volume, power, 0, lsb_mode);
                         } else {
                             use_txsound2 = false;
                             next_is_txsound2 = false;
@@ -347,7 +384,7 @@ public class LBService extends Service implements Runnable,
 
 
                             txsound = CJarInterface.WSPREncodeToPCM(
-                                    callsign, locator.substring(0, 4), power, 0, lsb_mode);
+                                    callsign, locator.substring(0, 4), volume, power, 0, lsb_mode);
                         }
                     } else {
                         use_txsound2 = true;
@@ -356,9 +393,9 @@ public class LBService extends Service implements Runnable,
                         String locator = this.sp.getString("gridsq", "LO05io");
                         int power = Integer.parseInt(this.sp.getString("outpower", "0"));
 
-                        txsound = CJarInterface.WSPREncodeToPCM(callsign, "", power, 0, lsb_mode);
+                        txsound = CJarInterface.WSPREncodeToPCM(callsign, "", volume, power, 0, lsb_mode);
 
-                        txsound2 = CJarInterface.WSPREncodeToPCM(callsign, locator, power, 0, lsb_mode);
+                        txsound2 = CJarInterface.WSPREncodeToPCM(callsign, locator, volume, power, 0, lsb_mode);
                     }
 
                 } else {
@@ -413,7 +450,7 @@ public class LBService extends Service implements Runnable,
                 setStatus(String.format(Locale.getDefault(),
                         getString(R.string.sv_uneven_minute_msg), today.minute));
                 try {
-                    Thread.sleep((59 - today.second) * 1000);
+                    Thread.sleep((59 - today.second) * 1000L);
                     if (quitter) {
                         return;
                     }
@@ -430,7 +467,8 @@ public class LBService extends Service implements Runnable,
                 stopSelf();
                 return;
             }
-            this.ar = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_MASK, ENCODING, BUFFER_SIZE);
+
+            this.ar = AudioRecordTools.getAudioRecord(this, this.mpr);
             this.ar.startRecording();
             while (this.ar.getState() != AudioRecord.STATE_INITIALIZED && !quitter) {
                 showErrorToast(getString(R.string.audiorecord_buggy_crap));
@@ -441,7 +479,7 @@ public class LBService extends Service implements Runnable,
             }
             //final preparation
             boolean run = true;
-            byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[CommonAudioTools.BUFFER_SIZE];
             int read = 0, total = 0;
 
 
@@ -485,30 +523,7 @@ public class LBService extends Service implements Runnable,
                     length = txsound.length;
                 }
 
-                int output_line = AudioManager.STREAM_VOICE_CALL;
-
-                switch (this.sp.getString("tx_output", "music")) {
-                    case "ring":
-                        output_line = AudioManager.STREAM_RING;
-                        break;
-                    case "music":
-                        output_line = AudioManager.STREAM_MUSIC;
-                        break;
-                    case "alarm":
-                        output_line = AudioManager.STREAM_ALARM;
-                        break;
-                    //case "call":
-                    default:
-                        output_line = AudioManager.STREAM_VOICE_CALL;
-                        break;
-                }
-
-                this.audio = new AudioTrack(output_line,
-                        SAMPLE_RATE, //sample rate
-                        AudioFormat.CHANNEL_OUT_MONO, //2 channel
-                        ENCODING, // 16-bit
-                        length,
-                        AudioTrack.MODE_STATIC);
+                this.audio = AudioPlaybackTools.createAudioPlayer(sp, length);
 
                 int slength = 0;
 
@@ -525,7 +540,7 @@ public class LBService extends Service implements Runnable,
 
                 audio.play();
                 try {
-                    Thread.sleep(slength / (SAMPLE_RATE * 2) * 1000);
+                    Thread.sleep(slength / (CommonAudioTools.SAMPLE_RATE * 2) * 1000);
                     if (quitter) {
                         return;
                     }
@@ -541,12 +556,12 @@ public class LBService extends Service implements Runnable,
                 if (audio.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
                     try {
                         Thread.sleep(500);
-                        if (quitter) {
-                            return;
-                        }
-                        audio.stop();
                     } catch (Exception e) {
                     }
+                    if (quitter) {
+                        return;
+                    }
+                    audio.stop();
                 }
 
                 audio.release();
@@ -582,7 +597,7 @@ public class LBService extends Service implements Runnable,
                 this.setStatus(getString(R.string.sv_status_recording));
 
                 boolean bDoReportVolume = this.sp.getBoolean("report_volume", false);
-                
+
                 ar.startRecording();
                 final Date recordTimestamp = new Date(System.currentTimeMillis());
                 while (run && !this.quitter) {

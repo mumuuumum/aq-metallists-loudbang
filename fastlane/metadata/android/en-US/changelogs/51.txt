@@ -1,0 +1,5 @@
+- Partial library and toolchain updates (while trying to keep Android 4 compatibility)
+- Exposed internal volume control for bluetooth CAT compatibility
+- Added random offset to the tone frequency to avoid interference with other transmitters
+- Added audio input selection option for various CAT interface options
+- Added MediaCapture mode that allows decoding audio from SDR apps or browsers

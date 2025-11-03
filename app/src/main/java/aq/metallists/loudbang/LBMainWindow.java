@@ -2,9 +2,13 @@ package aq.metallists.loudbang;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -70,13 +74,39 @@ public class LBMainWindow extends AppCompatActivity {
         /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();*/
 
-        if (!this.sp.getBoolean("welcome_dialog_shown", false)) {
-            this.sp.edit().putBoolean("welcome_dialog_shown", true).apply();
+        //TODO: switch to a multiline view
+        if (!this.sp.getBoolean("welcome_dialog_shown2", false)) {
             AlertDialog.Builder ab = new AlertDialog.Builder(this);
-            ab.setTitle(R.string.welcomdlg_title);
-            ab.setMessage(R.string.welcomdlg_text);
 
-            ab.setPositiveButton(R.string.welcomdlg_button, null);
+            ab.setTitle(R.string.welcomdlg_title);
+            ab.setMessage((Spanned) Html.fromHtml(getString(R.string.welcomdlg_text).replace("\n", "<br>")));
+
+            ab.setPositiveButton(R.string.welcomdlg_button, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    LBMainWindow.this.sp.edit().putBoolean("welcome_dialog_shown2", true).apply();
+                }
+            });
+            ab.setNeutralButton("F-Droid", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent browserIntent = new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://f-droid.org/2025/09/29/google-developer-registration-decree.html")
+                    );
+                    startActivity(browserIntent);
+                }
+            });
+            ab.setNegativeButton("Bootloader WoS", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent browserIntent = new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://github.com/zenfyrdev/bootloader-unlock-wall-of-shame")
+                    );
+                    startActivity(browserIntent);
+                }
+            });
 
             ab.create().show();
         }

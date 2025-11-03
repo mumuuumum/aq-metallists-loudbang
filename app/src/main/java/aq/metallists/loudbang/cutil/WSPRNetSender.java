@@ -69,8 +69,8 @@ public class WSPRNetSender {
         }
 
         public void send(String rxgrid, String callsign, String band) throws Exception {
-            DateFormat df = new SimpleDateFormat("yyMMdd");
-            DateFormat df2 = new SimpleDateFormat("HHmm");
+            DateFormat df = new SimpleDateFormat("yyMMdd", Locale.GERMANY);
+            DateFormat df2 = new SimpleDateFormat("HHmm", Locale.GERMANY);
             df.setTimeZone(TimeZone.getTimeZone("UTC"));
             df2.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -93,13 +93,13 @@ public class WSPRNetSender {
                     .appendQueryParameter("tcall", call)
                     .appendQueryParameter("tgrid", grid)
                     .appendQueryParameter("dbm", power)
-                    .appendQueryParameter("version", "libQSc0.49")
+                    .appendQueryParameter("version", "libQSc0.51")
                     .appendQueryParameter("mode", "2")
                     .build().toString());
 
             HttpURLConnection huc = (HttpURLConnection) url.openConnection();
             huc.setRequestMethod("GET");
-            huc.setRequestProperty("User-Agent", "libQuietScream 0.0.49");
+            huc.setRequestProperty("User-Agent", "libQuietScream 0.0.51");
             huc.connect();
 
             InputStream is = huc.getInputStream();

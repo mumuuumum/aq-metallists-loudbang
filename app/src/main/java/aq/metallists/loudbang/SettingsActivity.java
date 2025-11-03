@@ -3,6 +3,7 @@ package aq.metallists.loudbang;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -11,6 +12,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.regex.Pattern;
+
+import aq.metallists.loudbang.sndutil.AudioRecordTools;
 
 public class SettingsActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -70,7 +73,14 @@ public class SettingsActivity extends AppCompatActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key == null) {
+            Log.w("onShPrefChanged", "KEY === NULL!");
+            return;
+        }
         switch (key) {
+            case "rx_deviceid":
+                AudioRecordTools.validateAudioDeviceId(sharedPreferences, this);
+                break;
             case "tx_probability":
                 try {
                     int txprob = Integer.parseInt(

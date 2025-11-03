@@ -16,7 +16,7 @@ extern "C" JNIEXPORT jbyteArray
 
 JNICALL
 Java_aq_metallists_loudbang_cutil_CJarInterface_WSPREncodeToPCM
-        (JNIEnv *env, jclass cls, jstring j_calls, jstring j_loca, jint j_powr, jint j_offset,
+        (JNIEnv *env, jclass cls, jstring j_calls, jstring j_loca, jshort volume, jint j_powr, jint j_offset,
          jboolean lsb_mod) {
     //JTEncode jit;
     uint8_t symbols[WSPR_SYMBOL_COUNT];
@@ -46,7 +46,6 @@ Java_aq_metallists_loudbang_cutil_CJarInterface_WSPREncodeToPCM
     __android_log_print(ANDROID_LOG_WARN, APPNAME, "Target array length: %d",
                         WSPR_SYMBOL_COUNT * WSPR_SYMBOL_LENGTH);
 
-    short volume = 16383;
     for (int i = 0; i < WSPR_SYMBOL_COUNT; i++) {
         if (lsb_mod) {
             symbols[i] = (uint8_t) 3 - symbols[i];

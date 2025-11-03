@@ -2,12 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission
         android:name="android.permission.FLASHLIGHT"
         android:description="@string/prefab_flashbang_descr"
@@ -24,8 +30,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:exported="false"
             android:name=".AboutWindow"
+            android:exported="false"
             android:label="@string/mnu_about"
             android:theme="@style/AppTheme.NoActionBar" />
 
@@ -33,14 +39,14 @@
             android:name=".LBSpotUploadService"
             android:enabled="true"
             android:exported="false"
+            android:foregroundServiceType="dataSync"
             android:permission="TODO" />
 
         <activity
             android:name=".MessageDetailsActivity"
             android:label="@string/title_activity_message_details"
             android:parentActivityName=".LBMainWindow"
-            android:theme="@style/AppTheme.NoActionBar"
-            tools:targetApi="jelly_bean">
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="aq.metallists.loudbang.LBMainWindow" />
@@ -48,8 +54,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".LBMainWindow"
-            tools:targetApi="jelly_bean">
+            android:parentActivityName=".LBMainWindow">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="aq.metallists.loudbang.LBMainWindow" />
@@ -59,12 +64,13 @@
             android:name=".LBService"
             android:enabled="true"
             android:exported="false"
+            android:foregroundServiceType="mediaPlayback|mediaProjection|microphone"
             android:permission="TODO" />
 
         <activity
             android:name=".LBMainWindow"
-            android:label="@string/title_activity_lbmain_window"
             android:exported="true"
+            android:label="@string/title_activity_lbmain_window"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
