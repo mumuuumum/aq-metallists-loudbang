@@ -21,4 +21,6 @@ public class CJarInterface {
     public static native String WSPRLatLonToGSQ(double lat, double lon);
 
     public static native int radioCheck(int testvar);
+
+    public static native int getVolume(byte[] sound);
 }

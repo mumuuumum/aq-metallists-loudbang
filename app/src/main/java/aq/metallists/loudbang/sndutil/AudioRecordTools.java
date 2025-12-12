@@ -3,6 +3,7 @@ package aq.metallists.loudbang.sndutil;
 import static aq.metallists.loudbang.sndutil.CommonAudioTools.*;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -12,9 +13,11 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -98,39 +101,17 @@ public class AudioRecordTools {
         }
     }
 
+    @SuppressLint("NewApi")
     public static AudioRecord getAudioRecord(Context ctx, Object mprSrc) {
         if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             throw new Error("You have no permission to record audio.");
         }
 
+        AudioManager am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
         AudioRecord ar = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            AudioRecord.Builder arb = new AudioRecord.Builder()
-                    .setBufferSizeInBytes(BUFFER_SIZE)
-                    .setAudioFormat(
-                            new AudioFormat.Builder()
-                                    .setEncoding(ENCODING)
-                                    .setChannelMask(CHANNEL_MASK)
-                                    .setSampleRate(SAMPLE_RATE)
-                                    .build()
-                    );
+        AudioDeviceInfo tgtDev = null;
+        boolean isBluetooth = false;
 
-            if (mprSrc != null) {
-                MediaProjection mpr = (MediaProjection) mprSrc;
-                AudioPlaybackCaptureConfiguration config = new AudioPlaybackCaptureConfiguration.Builder(mpr)
-                        .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
-                        .addMatchingUsage(AudioAttributes.USAGE_GAME)
-                        .addMatchingUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                        .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
-                        .build();
-                arb.setAudioPlaybackCaptureConfig(config);
-            }
-
-            ar = arb.build();
-        } else {
-            // use boring constructor
-            ar = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_MASK, ENCODING, BUFFER_SIZE);
-        }
 
         if (mprSrc == null) {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -142,20 +123,31 @@ public class AudioRecordTools {
                 sp.edit().putInt("rx_deviceid", -1).apply();
             }
 
-            if (sourceId != -1) {
+            if (sourceId > 0) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    AudioManager am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
                     AudioDeviceInfo[] inputDevices = am.getDevices(AudioManager.GET_DEVICES_INPUTS);
 
                     boolean hasRequestedDevice = false;
                     for (AudioDeviceInfo dev : inputDevices) {
                         if (dev.getId() == sourceId) {
-                            ar.setPreferredDevice(dev);
+                            if (dev.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
+                                Log.i("ART", "Starting BluetothSCO!");
+                                /*
+                                 * TODO:
+                                 *  the stream type must be STREAM_VOICE_CALL
+                                 * the format must be mono
+                                 * the sampling must be 16kHz or 8kHz
+                                 * */
+
+                                isBluetooth = true;
+                            }
+                            tgtDev = dev;
                             hasRequestedDevice = true;
                         }
                     }
 
                     if (!hasRequestedDevice) {
+                        //TODO: run on UI thread
                         Toast.makeText(ctx, R.string.sndinput_device_vanished, Toast.LENGTH_LONG).show();
                     }
 
@@ -165,6 +157,51 @@ public class AudioRecordTools {
             }
         }
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            AudioRecord.Builder arb = new AudioRecord.Builder()
+                    .setBufferSizeInBytes(BUFFER_SIZE)
+                    .setAudioFormat(
+                            new AudioFormat.Builder()
+                                    .setEncoding(ENCODING)
+                                    .setChannelMask(CHANNEL_MASK)
+                                    .setSampleRate(SAMPLE_RATE)
+                                    .build()
+                    );
+
+            if (isBluetooth){
+                Log.i("ART", "VOICE_COMMUNICATION");
+                arb.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+            }
+            if (mprSrc != null) {
+                MediaProjection mpr = (MediaProjection) mprSrc;
+                AudioPlaybackCaptureConfiguration config = new AudioPlaybackCaptureConfiguration.Builder(mpr)
+                        .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                        /*
+                        TODO: add settings entry
+                        .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                        .addMatchingUsage(AudioAttributes.USAGE_GAME)
+                        .addMatchingUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                        .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)*/
+                        .build();
+                arb.setAudioPlaybackCaptureConfig(config);
+            }
+
+            ar = arb.build();
+        } else {
+            // use boring constructor
+            ar = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_MASK, ENCODING, BUFFER_SIZE);
+        }
+
+        if(isBluetooth){
+            am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            am.setBluetoothScoOn(true);
+            am.startBluetoothSco();
+        }
+        if (tgtDev != null) {
+            Log.i("ART", "SPD");
+            ar.setPreferredDevice(tgtDev);
+        }
 
         return ar;
     }

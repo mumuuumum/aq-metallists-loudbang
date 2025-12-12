@@ -64,7 +64,7 @@
             android:name=".LBService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback|mediaProjection|microphone"
+            android:foregroundServiceType="mediaPlayback|mediaProjection|microphone|location"
             android:permission="TODO" />
 
         <activity
@@ -78,7 +78,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

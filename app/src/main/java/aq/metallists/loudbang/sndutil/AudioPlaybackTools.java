@@ -8,6 +8,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
+
 import aq.metallists.loudbang.cutil.CJarInterface;
 
 public class AudioPlaybackTools {
@@ -25,7 +26,7 @@ public class AudioPlaybackTools {
         return (int) ((Math.random() * (70 - (-75) + 1)) + (-75));
     }
 
-    public static AudioTrack createAudioPlayer(SharedPreferences sp,int length){
+    public static AudioTrack createAudioPlayer(SharedPreferences sp, int length) {
         int output_line = AudioManager.STREAM_VOICE_CALL;
 
         switch (sp.getString("tx_output", "music")) {
@@ -48,6 +49,7 @@ public class AudioPlaybackTools {
                 ENCODING, // 16-bit
                 length,
                 AudioTrack.MODE_STATIC);
+
 
 
         return audio;

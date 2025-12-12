@@ -49,6 +49,7 @@ import org.acra.ACRA;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -251,7 +252,7 @@ public class LBService extends Service implements Runnable,
         }
 
         try {
-            if (wake != null)
+            if (wake != null && wake.isHeld())
                 wake.release();
         } catch (Exception x) {
             x.printStackTrace();
@@ -306,6 +307,31 @@ public class LBService extends Service implements Runnable,
             showErrorToast(getString(R.string.sv_error_flashbang_oldjunk));
         }
 
+    }
+
+    private void waitForIt(boolean ignoreOnDebug) {
+        if (ignoreOnDebug && BuildConfig.IS_DEBUGG) {
+            return;
+        }
+        Calendar cal = null;
+
+        while (true) {
+            cal = Calendar.getInstance();
+            if (cal.get(Calendar.MINUTE) % 2 != 0 || cal.get(Calendar.SECOND) > 0) {
+                setStatus(String.format(Locale.getDefault(),
+                        getString(R.string.sv_uneven_minute_msg), cal.get(Calendar.MINUTE)));
+                try {
+                    Thread.sleep((59 - cal.get(Calendar.SECOND)) * 1000L);
+                    if (this.quitter) {
+                        return;
+                    }
+                } catch (Exception e) {
+                    Log.w("waitForIt", e);
+                }
+            } else {
+                return;
+            }
+        }
     }
 
     @Override
@@ -443,21 +469,7 @@ public class LBService extends Service implements Runnable,
             if (true)
                 continue;*/
 
-            Time today = new Time(Time.getCurrentTimezone());
-            today.setToNow();
-
-            if (today.minute % 2 != 0 || today.second > 0) {
-                setStatus(String.format(Locale.getDefault(),
-                        getString(R.string.sv_uneven_minute_msg), today.minute));
-                try {
-                    Thread.sleep((59 - today.second) * 1000L);
-                    if (quitter) {
-                        return;
-                    }
-                } catch (Exception e) {
-                }
-                continue;
-            }
+            this.waitForIt(false);
 
             //prepairing buffersfor recording...
             ByteArrayOutputStream baos = new ByteArrayOutputStream(); // 12000 * 60 * 2
@@ -486,13 +498,12 @@ public class LBService extends Service implements Runnable,
             this.setStatus(getString(R.string.sv_second_remaining));
 
 
-            while (today.second < 1) {
+            while (Calendar.getInstance().get(Calendar.SECOND) < 1) {
                 try {
                     Thread.sleep(10);
                 } catch (Exception e) {
+                    Log.w("cantSleep", e);
                 }
-                today = new Time(Time.getCurrentTimezone());
-                today.setToNow();
             }
 
             if (quitter) {
@@ -598,29 +609,17 @@ public class LBService extends Service implements Runnable,
 
                 boolean bDoReportVolume = this.sp.getBoolean("report_volume", false);
 
-                ar.startRecording();
+                //ar.startRecording();
                 final Date recordTimestamp = new Date(System.currentTimeMillis());
                 while (run && !this.quitter) {
                     read = ar.read(buffer, 0, buffer.length);
 
-                    ///AMPT CALC
                     if (bDoReportVolume) {
-                        int sum = 0;
-                        for (int i = 0; i < read; i++) {
-                            sum += Math.abs(buffer[i]);
-                        }
-
-                        if (read > 0) {
-                            sum = sum / read;
-                        }
-
                         Intent itt = new Intent("eme.eva.loudbang.recordlevel");
-                        itt.putExtra("eme.eva.loudbang.level", sum);
-
+                        itt.putExtra("eme.eva.loudbang.level", CJarInterface.getVolume(buffer));
 
                         LocalBroadcastManager.getInstance(this).sendBroadcast(itt);
                     }
-                    //END AMPT CALC
 
 
                     if (total + read > 12000 * 2 * 114) {
@@ -705,7 +704,7 @@ public class LBService extends Service implements Runnable,
     private void decodersRun(byte[] record, Date recordTimestamp) {
         this.setStatus(getString(R.string.sv_status_decoding));
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMANY);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         DBHelper dh = new DBHelper(this.getApplicationContext());

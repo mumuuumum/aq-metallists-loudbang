@@ -35,8 +35,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -87,7 +89,16 @@ public class PlaceholderFragment extends Fragment
         }
     }
 
+    private Timer tmr;
+
     public void onDestroyView() {
+        if (tmr != null) {
+            tmr.cancel();
+            tmr.purge();
+            tmr = null;
+        }
+
+
         if (this.bs != null) {
             try {
                 LocalBroadcastManager.getInstance(this.getActivity()).unregisterReceiver(this.bs);
@@ -145,14 +156,13 @@ public class PlaceholderFragment extends Fragment
             state.setText(LBService.lastKnownState);
         }
 
-        pbbm.setMax(32767);
 
         this.sp = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
         this.bs = new BroadcastReceiver() {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().contains("eme.eva.loudbang.state")) {
+                if (Objects.requireNonNull(intent.getAction()).contains("eme.eva.loudbang.state")) {
                     boolean isRunnin = isMyServiceRunning(LBService.class);
                     ltb.setChecked(isRunnin);
 
@@ -174,6 +184,12 @@ public class PlaceholderFragment extends Fragment
         ltb.setOnClickListener(v -> {
             List<String> permissionsToRequest = new ArrayList<>();
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                addPermissionToRequest(root,
+                        permissionsToRequest, Manifest.permission.POST_NOTIFICATIONS);
+            }
+
+            //TODO: add a way to play-only
             addPermissionToRequest(root,
                     permissionsToRequest, Manifest.permission.RECORD_AUDIO);
 
@@ -283,17 +299,18 @@ public class PlaceholderFragment extends Fragment
 
         //set tracking timer forsome systems
         final TextView lblCurrentTime = root.findViewById(R.id.lblCurrentTime);
-        final Timer tmr = new Timer();
+        tmr = new Timer();
         tmr.schedule(new TimerTask() {
             @Override
             public void run() {
-                Time today = new Time(Time.getCurrentTimezone());
-                today.setToNow();
+                Calendar cal = Calendar.getInstance();
                 final String out = String.format(Locale.GERMANY, "%02d.%02d.%04d %02d:%02d:%02d",
-                        today.monthDay, today.month, today.year, today.hour, today.minute, today.second);
+                        cal.get(Calendar.DAY_OF_MONTH), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),
+                        cal.get(Calendar.HOUR), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
 
                 Activity thisAct = getActivity();
                 if (thisAct == null) {
+                    Log.e("PHFrag", "thisAct is NULL!");
                     tmr.cancel();
                     tmr.purge();
                     return;

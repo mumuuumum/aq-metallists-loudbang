@@ -16,7 +16,8 @@ extern "C" JNIEXPORT jbyteArray
 
 JNICALL
 Java_aq_metallists_loudbang_cutil_CJarInterface_WSPREncodeToPCM
-        (JNIEnv *env, jclass cls, jstring j_calls, jstring j_loca, jshort volume, jint j_powr, jint j_offset,
+        (JNIEnv *env, jclass cls, jstring j_calls, jstring j_loca, jshort volume, jint j_powr,
+         jint j_offset,
          jboolean lsb_mod) {
     //JTEncode jit;
     uint8_t symbols[WSPR_SYMBOL_COUNT];
@@ -101,7 +102,10 @@ Java_aq_metallists_loudbang_cutil_CJarInterface_WSPRDecodeFromPcm(JNIEnv *env, j
                                                                   jdouble dialfreq, jboolean lsb) {
     unsigned char *soundarr = as_unsigned_char_array(env, sound);
 
-    return jani_do_process(env, clazz, soundarr, (int) env->GetArrayLength(sound), dialfreq, lsb);
+    jobjectArray res = jani_do_process(env, clazz, soundarr, (int) env->GetArrayLength(sound),
+                                       dialfreq, lsb);
+    delete soundarr;
+    return res;
 }
 
 
@@ -210,4 +214,20 @@ Java_aq_metallists_loudbang_cutil_CJarInterface_GenTestBeep
                             (jbyte *) sound);
     free(sound);// is it work?
     return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_aq_metallists_loudbang_cutil_CJarInterface_getVolume(JNIEnv *env, jclass clazz,
+                                                          jbyteArray sound) {
+    short *soundarr = (short *) as_unsigned_char_array(env, sound);
+    int len = env->GetArrayLength(sound) / 2;
+    int sum = 0;
+
+    for (int i = 0; i < len; i++) {
+        sum += abs((int) soundarr[i]);
+    }
+
+    delete soundarr;
+    return sum / len;
 }
