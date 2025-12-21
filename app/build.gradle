@@ -2,16 +2,17 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 36
-    ndkVersion "22.1.7171670"
+    ndkVersion "21.3.6528147"
 
     defaultConfig {
         applicationId "aq.metallists.loudbang"
         minSdkVersion 16
         targetSdkVersion 36
-        versionCode 52
-        versionName "0.52"
+        versionCode 53
+        versionName "0.53"
         multiDexEnabled true
         buildConfigField 'boolean', 'IS_DEBUGG', 'false'
+        archivesBaseName = "LoudBang-v${versionName}"
         ndk {
             abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }

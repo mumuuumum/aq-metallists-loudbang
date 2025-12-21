@@ -67,6 +67,7 @@ public class LBMainWindow extends AppCompatActivity {
                 = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = findViewById(R.id.lbmain_viewpager);
         viewPager.setAdapter(sectionsPagerAdapter);
+
         TabLayout tabs = findViewById(R.id.lbmain_tablayout);
         tabs.setupWithViewPager(viewPager);
 

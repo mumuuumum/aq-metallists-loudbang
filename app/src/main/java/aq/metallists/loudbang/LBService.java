@@ -1,7 +1,5 @@
 package aq.metallists.loudbang;
 
-import static androidx.core.app.ActivityCompat.startActivityForResult;
-
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -20,12 +18,8 @@ import android.hardware.camera2.CameraManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
-import android.media.MediaRecorder;
-import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,7 +27,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -313,15 +306,25 @@ public class LBService extends Service implements Runnable,
         if (ignoreOnDebug && BuildConfig.IS_DEBUGG) {
             return;
         }
-        Calendar cal = null;
-
+        int prevMinute = -1;
         while (true) {
-            cal = Calendar.getInstance();
-            if (cal.get(Calendar.MINUTE) % 2 != 0 || cal.get(Calendar.SECOND) > 0) {
-                setStatus(String.format(Locale.getDefault(),
-                        getString(R.string.sv_uneven_minute_msg), cal.get(Calendar.MINUTE)));
+            Calendar cal = Calendar.getInstance();
+            int minute = cal.get(Calendar.MINUTE);//CChronograph.getMinute();
+            int second = cal.get(Calendar.SECOND);//CChronograph.getSecond();
+
+            if (minute % 2 != 0 || second > 0) {
+                if (prevMinute != minute) {
+                    setStatus(String.format(Locale.getDefault(),
+                            getString(R.string.sv_uneven_minute_msg), minute));
+                    prevMinute = minute;
+                }
                 try {
-                    Thread.sleep((59 - cal.get(Calendar.SECOND)) * 1000L);
+                    if (second < 50) {
+                        Thread.sleep(5000L);
+                    } else {
+                        Thread.sleep(500L);
+                    }
+
                     if (this.quitter) {
                         return;
                     }
@@ -497,13 +500,14 @@ public class LBService extends Service implements Runnable,
 
             this.setStatus(getString(R.string.sv_second_remaining));
 
-
-            while (Calendar.getInstance().get(Calendar.SECOND) < 1) {
+            Calendar cal = Calendar.getInstance();
+            while (cal.get(Calendar.SECOND) < 1) {
                 try {
                     Thread.sleep(10);
                 } catch (Exception e) {
                     Log.w("cantSleep", e);
                 }
+                cal = Calendar.getInstance();
             }
 
             if (quitter) {

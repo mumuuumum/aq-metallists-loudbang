@@ -2,8 +2,10 @@
 #include <iostream>
 #include "lbenc2/wenc.h"
 #include <android/log.h>
-#include <stdio.h>
-#include <math.h>
+#include <chrono>
+#include <ctime>
+#include <cstdio>
+#include <cmath>
 
 int mains() {
     return 220;
@@ -230,4 +232,22 @@ Java_aq_metallists_loudbang_cutil_CJarInterface_getVolume(JNIEnv *env, jclass cl
 
     delete soundarr;
     return sum / len;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_aq_metallists_loudbang_cutil_CChronograph_getMinute(JNIEnv *env, jclass clazz) {
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(now);
+    tm local_tm = *localtime(&tt);
+    return local_tm.tm_min;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_aq_metallists_loudbang_cutil_CChronograph_getSecond(JNIEnv *env, jclass clazz) {
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(now);
+    tm local_tm = *localtime(&tt);
+    return local_tm.tm_sec;
 }
