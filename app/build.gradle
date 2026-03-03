@@ -1,75 +1,65 @@
-apply plugin: 'com.android.application'
-
-android {
-    compileSdkVersion 36
-    ndkVersion "21.3.6528147"
-
-    defaultConfig {
+apply(['plugin': 'com.android.application'])
+android { 
+    ndkVersion('23.2.0')
+    compileSdkVersion(36)
+    defaultConfig { 
         applicationId "aq.metallists.loudbang"
-        minSdkVersion 16
-        targetSdkVersion 36
-        versionCode 53
-        versionName "0.53"
-        multiDexEnabled true
-        buildConfigField 'boolean', 'IS_DEBUGG', 'false'
-        archivesBaseName = "LoudBang-v${versionName}"
-        ndk {
-            abiFilters "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+        minSdkVersion(29)
+        targetSdkVersion(36)
+        versionCode(53)
+        versionName('0.53')
+        multiDexEnabled(true)
+        buildConfigField('boolean', 'IS_DEBUGG', 'false')
+        archivesBaseName = "LoudBang-v$versionName"
+        ndk { 
+            abiFilters('armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64')
         }
-        externalNativeBuild {
-            cmake {
-                targets "QuietScream"
-                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+        externalNativeBuild { 
+            cmake { 
+                targets('QuietScream')
+                arguments('-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON')
             }
         }
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    buildTypes { 
+        release { 
+            minifyEnabled(false)
+            proguardFiles(getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro')
         }
-        debug {
-            buildConfigField 'boolean', 'IS_DEBUGG', 'true'
-        }
-    }
-
-    buildFeatures {
-        buildConfig true
-    }
-
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
+        debug { 
+            buildConfigField('boolean', 'IS_DEBUGG', 'true')
         }
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    buildFeatures { 
+        buildConfig(true)
     }
-    namespace 'aq.metallists.loudbang'
+    externalNativeBuild { 
+        cmake { 
+            path(file('CMakeLists.txt'))
+        }
+    }
+    compileOptions { 
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
+    }
+    namespace('aq.metallists.loudbang')
 }
-
-dependencies {
-// AndroidX
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-livedata:2.6.2'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'com.google.android.material:material:1.9.0'
-
-// Third-party
-    def acraVersion = "5.13.1"
-    implementation "ch.acra:acra-dialog:$acraVersion"
-    implementation "ch.acra:acra-mail:$acraVersion"
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))
+dependencies { 
+    implementation('androidx.appcompat:appcompat:1.6.1')
+    implementation('androidx.core:core-ktx:1.12.0')
+    implementation('androidx.constraintlayout:constraintlayout:2.1.4')
+    implementation('androidx.lifecycle:lifecycle-livedata:2.6.2')
+    implementation('androidx.lifecycle:lifecycle-viewmodel:2.6.2')
+    implementation('androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2')
+    implementation('androidx.preference:preference:1.2.0')
+    implementation('com.google.android.material:material:1.9.0')
+    java.lang.Object acraVersion = '5.13.1'
+    implementation("ch.acra:acra-dialog:$acraVersion")
+    implementation("ch.acra:acra-mail:$acraVersion")
+    implementation(platform('org.jetbrains.kotlin:kotlin-bom:1.8.22'))
 }
-java {
-    toolchain {
+java { 
+    toolchain { 
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
